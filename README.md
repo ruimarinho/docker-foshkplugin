@@ -27,10 +27,18 @@ This repository provides a Docker image for [FOSHKplugin](https://foshkplugin.ph
 2. **Run the Docker container:**
 
    ```bash
-   docker run -d --name foshkplugin -v /path/to/config:/opt/foshkplugin/config -e LBPCONFIG=/opt/foshkplugin/config ghcr.io/ruimarinho/foshkplugin
+   docker run -d --name foshkplugin -v /path/to/config:/opt/foshkplugin/config -e LBPCONFIG=/opt/foshkplugin/config -e PUID=1000 -e PGID=1000 ghcr.io/ruimarinho/foshkplugin
    ```
 
    - Replace `/path/to/config` with the path to your local configuration directory.
+
+## Configuration
+
+The following environment variables can be used to configure the container:
+
+- `PUID`: User ID for the application process (default: 1000)
+- `PGID`: Group ID for the application process (default: 1000)
+- `LBPCONFIG`: Path to the configuration directory inside the container (default: not set)
 
 ### Usage
 
@@ -50,6 +58,8 @@ services:
       - ./logs:/opt/foshkplugin/logs
     environment:
       - LBPCONFIG=/opt/foshkplugin/config
+      - PUID=1000
+      - PGID=1000
 ```
 
 ## Building the Image Locally
@@ -59,8 +69,10 @@ If you prefer to build the Docker image yourself, clone this repository and use 
 ```bash
 git clone https://github.com/ruimarinho/docker-foshkplugin.git
 cd docker-foshkplugin
-docker build -t ghcr.io/ruimarinho/foshkplugin .
+docker build --build-arg PUID=1000 --build-arg PGID=1000 -t ghcr.io/ruimarinho/foshkplugin .
 ```
+
+You can customize the default user/group IDs at build time using the `PUID` and `PGID` build arguments.
 
 ## Contributing
 
