@@ -7,7 +7,7 @@ This repository provides a Docker image for [FOSHKplugin](https://foshkplugin.ph
 ## Features
 
 - **Easy Deployment:** Quickly set up FOSHKplugin using Docker.
-- **Lightweight:** Built on the official `python:3.11-slim` image for efficient use of resources.
+- **Lightweight:** Multi-stage build on the official `python:3.11-alpine` image, running as a non-root user.
 - **Flexible:** Easily configurable with environment variables and command-line options.
 
 ## Getting Started
