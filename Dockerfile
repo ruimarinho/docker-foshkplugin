@@ -25,7 +25,7 @@ RUN wget -q -N -O generic-FOSHKplugin.zip \
     rm generic-FOSHKplugin.zip
 
 # Install necessary Python packages
-RUN pip3 install --no-cache-dir --upgrade requests paho-mqtt influxdb pillow influxdb-client
+RUN pip3 install --no-cache-dir --upgrade requests paho-mqtt influxdb pillow influxdb-client paramiko
 
 # Modify the Python script as needed
 RUN sed -i 's/(200,203)/(200,205)/g' foshkplugin.py
