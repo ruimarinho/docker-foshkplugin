@@ -27,14 +27,20 @@ This repository provides a Docker image for [FOSHKplugin](https://foshkplugin.ph
 2. **Run the Docker container:**
 
    ```bash
-   docker run -d --name foshkplugin -v /path/to/config:/opt/foshkplugin/config -e LBPCONFIG=/opt/foshkplugin/config ghcr.io/ruimarinho/foshkplugin
+   docker run -d --name foshkplugin \
+     -p 8780:8780/udp -p 8781:8781 \
+     -v /path/to/foshkplugin.conf:/opt/foshkplugin/foshkplugin.conf \
+     -v /path/to/logs:/opt/foshkplugin/logs \
+     ghcr.io/ruimarinho/foshkplugin
    ```
 
-   - Replace `/path/to/config` with the path to your local configuration directory.
+   - The plugin reads its configuration from `/opt/foshkplugin/foshkplugin.conf`, so bind-mount your config file directly over that path.
+   - The published ports must match the `LBU_PORT` (UDP) and `LBH_PORT` (HTTP) values in your `foshkplugin.conf`.
+   - The container runs as a non-root user (uid 1000). Make sure the mounted config file and logs directory are writable by uid 1000 — the plugin updates its `[Status]` section on shutdown and writes logs continuously.
 
 ### Usage
 
-The container will automatically run the FOSHKplugin application. You can configure the plugin by editing the configuration files in your local directory, which is mounted inside the container.
+The container will automatically run the FOSHKplugin application. You can configure the plugin by editing the mounted `foshkplugin.conf` file and restarting the container.
 
 #### docker-compose
 
@@ -43,14 +49,20 @@ services:
   foshkplugin:
     image: ghcr.io/ruimarinho/foshkplugin
     ports:
-      - 8780:8780/udp
-      - 8781:8781
+      - 8780:8780/udp # LBU_PORT
+      - 8781:8781 # LBH_PORT
     volumes:
       - ./foshkplugin.conf:/opt/foshkplugin/foshkplugin.conf
       - ./logs:/opt/foshkplugin/logs
-    environment:
-      - LBPCONFIG=/opt/foshkplugin/config
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8781/FOSHKplugin/status')"]
+      interval: 30s
+      timeout: 10s
+      start_period: 15s
+      retries: 3
 ```
+
+The healthcheck probes the plugin's status endpoint and requires `LBH_PORT = 8781` in your `foshkplugin.conf`; adjust or remove it if you use a different port.
 
 ## Building the Image Locally
 
